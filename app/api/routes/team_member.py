@@ -12,31 +12,26 @@ team_member_update_schema = TeamMemberUpdateSchema()
 
 
 class TeamMemberView(MethodView):
-    # @jwt_required()
+    @jwt_required()
     def delete(self, team_member_id):
-        current_app.logger.info(request.headers)
-        return jsonify({"message": f"Deleted team member {id}"}), 200
+        user_id = get_jwt_identity()
+        if user_service.delete_team_member(user_id, team_member_id):
+            return jsonify({"status": 200, "message": "Team member deleted"})
+        else:
+            raise CustomBadRequest("Team member deletion failed")
 
-    #     print("JWT:", get_jwt_identity())
-    #     ------------------------------------------------------------
-    #     user_id = get_jwt_identity()
-    #     if user_service.delete_team_member(user_id, team_member_id):
-    #         return jsonify({"status": 200, "message": "Team member deleted"})
-    #     else:
-    #         raise CustomBadRequest("Team member deletion failed")
-    #
-    # @jwt_required()
-    # def post(self):
-    #     user_id = get_jwt_identity()
-    #     errors = team_member_schema.validate(request.json)
-    #     if errors:
-    #         raise CustomBadRequest(description=jsonify(errors).get_data(as_text=True))
-    #
-    #     new_member = user_service.add_team_member(user_id, **request.json)
-    #     if new_member:
-    #         return jsonify(new_member.serialize), 201
-    #     else:
-    #         raise CustomBadRequest("Team member addition failed")
+    @jwt_required()
+    def post(self):
+        user_id = get_jwt_identity()
+        errors = team_member_schema.validate(request.json)
+        if errors:
+            raise CustomBadRequest(description=jsonify(errors).get_data(as_text=True))
+
+        new_member = user_service.add_team_member(user_id, **request.json)
+        if new_member:
+            return jsonify(new_member.serialize), 201
+        else:
+            raise CustomBadRequest("Team member addition failed")
 
     @jwt_required()
     def patch(self):
