@@ -1,7 +1,6 @@
 *.pyc
 *.pyo
 *.pyd
-.env
 *.log
 *.sqlite
 __pycache__

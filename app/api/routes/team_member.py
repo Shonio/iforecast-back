@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, current_app, jsonify, request
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -16,6 +16,7 @@ class TeamMemberView(MethodView):
     def delete(self, team_member_id):
         current_app.logger.info(request.headers)
         return jsonify({"message": f"Deleted team member {id}"}), 200
+
     #     print("JWT:", get_jwt_identity())
     #     ------------------------------------------------------------
     #     user_id = get_jwt_identity()
