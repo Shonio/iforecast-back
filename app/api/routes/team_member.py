@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from flask.views import MethodView
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -12,6 +12,20 @@ team_member_update_schema = TeamMemberUpdateSchema()
 
 
 class TeamMemberView(MethodView):
+
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        current_app.logger.info("User %s requested team members", user_id)
+
+        team_members = user_service.get_all_team_members(user_id)
+        if team_members:
+            current_app.logger.info("Team members found")
+            return jsonify([member.serialize for member in team_members])
+        else:
+            current_app.logger.error("Team members not found")
+            return jsonify([])
+
     @jwt_required()
     def delete(self, team_member_id):
         user_id = get_jwt_identity()
@@ -52,9 +66,6 @@ team_member_bp.add_url_rule(
     view_func=team_member_view,
     methods=["DELETE"],
 )
-team_member_bp.add_url_rule(
-    "/api/team_member", view_func=team_member_view, methods=["POST"]
-)
-team_member_bp.add_url_rule(
-    "/api/team_member", view_func=team_member_view, methods=["PATCH"]
-)
+team_member_bp.add_url_rule("/api/team_member", view_func=team_member_view, methods=["POST"])
+team_member_bp.add_url_rule("/api/team_member", view_func=team_member_view, methods=["PATCH"])
+team_member_bp.add_url_rule("/api/team_member", view_func=team_member_view, methods=["GET"])

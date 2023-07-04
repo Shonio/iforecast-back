@@ -14,7 +14,7 @@ class User(db.Model):
     status = db.Column(db.Enum("active", "inactive", "suspended"), nullable=False)
 
     power_plants = db.relationship("PowerPlant", back_populates="user", lazy=False)
-    team_members = db.relationship("TeamMember", back_populates="user", lazy=False)
+    team_members = db.relationship("TeamMember", back_populates="user", lazy=True)
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode("utf-8")
@@ -38,5 +38,4 @@ class User(db.Model):
             "updated": str(self.updated),
             "status": self.status,
             "power_plants": [pp.serialize for pp in self.power_plants],
-            "team_members": [tm.serialize for tm in self.team_members],
         }

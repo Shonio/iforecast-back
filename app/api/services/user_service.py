@@ -12,6 +12,13 @@ def get_user_by_id(user_id: int) -> Optional[User]:
     return User.query.filter_by(id=user_id).first()
 
 
+def get_all_team_members(user_id: int) -> Optional[TeamMember]:
+    user = get_user_by_id(user_id)
+    if user:
+        return TeamMember.query.filter_by(user_id=user_id).all()
+    return None
+
+
 def update_team_member(user_id: int, team_member_id: int, **kwargs) -> bool:
     user = get_user_by_id(user_id)
     if user:
