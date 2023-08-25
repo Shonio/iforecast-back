@@ -17,6 +17,9 @@ jobs:
     runs-on: self-hosted
 
     steps:
+    - name: Clenup work dir
+      run: |
+        sudo rm -r -d /home/ubuntu/iforecast-back-runner/_work/iforecast-back/iforecast-back/*
     - uses: actions/checkout@v3
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
