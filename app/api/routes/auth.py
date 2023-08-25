@@ -58,11 +58,14 @@ class AuthView(MethodView):
             return self.refresh()
         elif request.path.endswith("sign-in"):
             return self.sign_in()
+        elif request.path.endswith("test"):
+            return jsonify({"message": "Hello world"}), 200
         else:
             return jsonify({"error": "Request not allowed"}), 405
 
 
 auth_view = AuthView.as_view("auth_view")
+auth_bp.add_url_rule("/test", view_func=auth_view, methods=["GET"])
 auth_bp.add_url_rule("/api/auth/access-token", view_func=auth_view, methods=["POST"])
 auth_bp.add_url_rule("/api/auth/refresh", view_func=auth_view, methods=["POST"])
 auth_bp.add_url_rule("/api/auth/sign-in", view_func=auth_view, methods=["POST"])
