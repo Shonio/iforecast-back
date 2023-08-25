@@ -44,7 +44,8 @@ def create_app(config_class=Config):
 
 def configure_logging(app):
     if not app.debug:
-        log_dir = Path("logs")
+        # Get path to logs directory ../logs
+        log_dir = Path(app.root_path).parent / "logs"
         log_dir.mkdir(exist_ok=True)
         file_handler = RotatingFileHandler(
             log_dir / "app.log", maxBytes=10240, backupCount=10
