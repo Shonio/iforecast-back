@@ -37,14 +37,14 @@ class PowerPlantView(MethodView):
         #     if d.power_prediction is not None:
         #         d.power_prediction = round(float(d.power_prediction) / 1000, 3)
 
-        return (jsonify({
+        return jsonify([
             {"name": "Actual",
              "series": [{"name": d.timestamp.hour, "value": d.power, } for d in data],
              },
             {"name": "Prediction",
              "series": [{"name": d.timestamp.hour, "value": d.power_prediction, } for d in data],
              },
-        }), 200,)
+        ]), 200
 
     def get_power_plant_monthly_stats(self):
         errors = power_plant_month_data_schema.validate(request.args)
