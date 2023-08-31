@@ -13,4 +13,3 @@ eventlet~=0.33.3
 redis~=4.5.4
 gevent~=23.7.0
 pandas~=2.1.0
-```
