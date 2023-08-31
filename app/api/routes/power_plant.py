@@ -23,35 +23,42 @@ class PowerPlantView(MethodView):
         power_plant_id = request.args.get("power_plant_id", type=int)
         timestamp = datetime.strptime(request.args.get("timestamp", type=str), "%Y-%m-%d").date()
 
-        # ---------------------------------
-        data = power_plant_service.get_power_plant_day_stats(power_plant_id, timestamp)
-        # if data is empty, return 404
-        if not data:
+        plant_prediction_models = power_plant_service.get_prediction_models_by_power_plant_id(power_plant_id)
+
+        # Check if there is any prediction model
+        if plant_prediction_models.empty:
             return jsonify({"error": "Not found"}), 404
-        # else, return data
 
-        # Old version
-        return (
-            jsonify(
-                [
-                    {
-                        "labels": d.timestamp.hour,
-                        "actual": d.power,
-                        "prediction": d.power_prediction,
-                    }
-                    for d in data
-                ]
-            ),
-            200, )
+        # Get prediction models ids
+        model_ids = plant_prediction_models["id"].tolist()
 
-        # return jsonify([
-        #     {"name": "Actual",
-        #      "series": [{"name": d.timestamp.hour, "value": d.power, } for d in data],
-        #      },
-        #     {"name": "Prediction",
-        #      "series": [{"name": d.timestamp.hour, "value": d.power_prediction, } for d in data],
-        #      },
-        # ]), 200
+        # Get power plant stats with model data
+        data = power_plant_service.get_power_plant_stats_with_model_data(power_plant_id, timestamp, model_ids)
+
+        # Check if there is any data
+        if data.empty:
+            return jsonify({"error": "Not found"}), 404
+
+        # Get unique model ids
+        model_ids = data["prediction_model_id"].unique().tolist()
+
+        # Build response
+        response = []
+        actual_data = data[data["prediction_model_id"] == model_ids[0]]
+        response.append({
+            "name": "Actual",
+            "series": [{"name": d.timestamp.hour, "value": d.power, } for d in actual_data.itertuples()],
+        })
+
+        # Get prediction models data
+        for model_id in model_ids:
+            model_data = data[data["prediction_model_id"] == model_id]
+            response.append({
+                "name": plant_prediction_models[plant_prediction_models["id"] == model_id]["name"].values[0],
+                "series": [{"name": d.timestamp.hour, "value": d.power_prediction, } for d in model_data.itertuples()],
+            })
+
+        return jsonify(response), 200
 
     def get_power_plant_monthly_stats(self):
         errors = power_plant_month_data_schema.validate(request.args)
@@ -61,15 +68,42 @@ class PowerPlantView(MethodView):
         power_plant_id = request.args.get("power_plant_id", type=int)
         timestamp = datetime.strptime(request.args.get("timestamp", type=str), "%Y-%m").date()
 
-        # ---------------------------------
-        data = power_plant_service.get_power_plant_monthly_stats(power_plant_id, timestamp)
-        # if data is empty, return 404
-        if not data:
+        plant_prediction_models = power_plant_service.get_prediction_models_by_power_plant_id(power_plant_id)
+
+        # Check if there is any prediction model
+        if plant_prediction_models.empty:
             return jsonify({"error": "Not found"}), 404
-        # else, return data
-        return (jsonify(
-            [{"labels": d.timestamp.day, "actual": d.total_power, "prediction": d.total_power_prediction, } for d in
-                data]), 200,)
+
+        # Get prediction models ids
+        model_ids = plant_prediction_models["id"].tolist()
+
+        # Get power plant stats with model data
+        data = power_plant_service.get_monthly_stats_with_model_data(power_plant_id, timestamp, model_ids)
+
+        # Check if there is any data
+        if data.empty:
+            return jsonify({"error": "Not found"}), 404
+
+        # Get unique model ids
+        model_ids = data["prediction_model_id"].unique().tolist()
+
+        # Build response
+        response = []
+        actual_data = data[data["prediction_model_id"] == model_ids[0]]
+        response.append({
+            "name": "Actual",
+            "series": [{"name": d.timestamp.day, "value": d.total_power, } for d in actual_data.itertuples()],
+        })
+
+        # Get prediction models data
+        for model_id in model_ids:
+            model_data = data[data["prediction_model_id"] == model_id]
+            response.append({
+                "name": plant_prediction_models[plant_prediction_models["id"] == model_id]["name"].values[0],
+                "series": [{"name": d.timestamp.day, "value": d.total_power_prediction, } for d in model_data.itertuples()],
+            })
+
+        return jsonify(response), 200
 
     def get_power_plant_yearly_stats(self):
         errors = power_plant_year_data_schema.validate(request.args)
@@ -79,15 +113,43 @@ class PowerPlantView(MethodView):
         power_plant_id = request.args.get("power_plant_id", type=int)
         timestamp = datetime.strptime(request.args.get("timestamp", type=str), "%Y").date()
 
-        # ---------------------------------
-        data = power_plant_service.get_power_plant_yearly_stats(power_plant_id, timestamp)
-        # if data is empty, return 404
-        if not data:
+        plant_prediction_models = power_plant_service.get_prediction_models_by_power_plant_id(power_plant_id)
+
+        # Check if there is any prediction model
+        if plant_prediction_models.empty:
             return jsonify({"error": "Not found"}), 404
-        # else, return data
-        return (jsonify(
-            [{"labels": d.timestamp.month, "actual": d.total_power, "prediction": d.total_power_prediction, } for d in
-                data]), 200,)
+
+        # Get prediction models ids
+        model_ids = plant_prediction_models["id"].tolist()
+
+        # Get power plant stats with model data
+        data = power_plant_service.get_yearly_stats_with_model_data(power_plant_id, timestamp, model_ids)
+
+        # Check if there is any data
+        if data.empty:
+            return jsonify({"error": "Not found"}), 404
+
+        # Get unique model ids
+        model_ids = data["prediction_model_id"].unique().tolist()
+
+        # Build response
+        response = []
+        actual_data = data[data["prediction_model_id"] == model_ids[0]]
+        response.append({
+            "name": "Actual",
+            "series": [{"name": d.timestamp.month, "value": d.total_power, } for d in actual_data.itertuples()],
+        })
+
+        # Get prediction models data
+        for model_id in model_ids:
+            model_data = data[data["prediction_model_id"] == model_id]
+            response.append({
+                "name": plant_prediction_models[plant_prediction_models["id"] == model_id]["name"].values[0],
+                "series": [{"name": d.timestamp.month, "value": d.total_power_prediction, } for d in model_data.itertuples()],
+            })
+
+        return jsonify(response), 200
+
 
     def dispatch_request(self, *args, **kwargs):
         if request.method == "GET":
