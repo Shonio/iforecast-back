@@ -30,21 +30,28 @@ class PowerPlantView(MethodView):
             return jsonify({"error": "Not found"}), 404
         # else, return data
 
-        # Convert power and power_prediction to kWh and round to 3 decimal places
-        # for d in data:
-        #     if d.power is not None:
-        #         d.power = round(float(d.power) / 1000, 3)
-        #     if d.power_prediction is not None:
-        #         d.power_prediction = round(float(d.power_prediction) / 1000, 3)
+        # Old version
+        return (
+            jsonify(
+                [
+                    {
+                        "labels": d.timestamp.hour,
+                        "actual": d.power,
+                        "prediction": d.power_prediction,
+                    }
+                    for d in data
+                ]
+            ),
+            200, )
 
-        return jsonify([
-            {"name": "Actual",
-             "series": [{"name": d.timestamp.hour, "value": d.power, } for d in data],
-             },
-            {"name": "Prediction",
-             "series": [{"name": d.timestamp.hour, "value": d.power_prediction, } for d in data],
-             },
-        ]), 200
+        # return jsonify([
+        #     {"name": "Actual",
+        #      "series": [{"name": d.timestamp.hour, "value": d.power, } for d in data],
+        #      },
+        #     {"name": "Prediction",
+        #      "series": [{"name": d.timestamp.hour, "value": d.power_prediction, } for d in data],
+        #      },
+        # ]), 200
 
     def get_power_plant_monthly_stats(self):
         errors = power_plant_month_data_schema.validate(request.args)
