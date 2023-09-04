@@ -16,6 +16,12 @@ class PowerPlantDayStatsSchema(Schema):
     timestamp = fields.Date(required=True, format="%Y-%m-%d")
 
 
+class PowerPlantDayStatsRangeSchema(Schema):
+    power_plant_id = fields.Int(required=True)
+    startDate = fields.Date(required=True, format="%Y-%m-%d")
+    endDate = fields.Date(required=True, format="%Y-%m-%d")
+
+
 class PowerPlantMonthStatsSchema(Schema):
     power_plant_id = fields.Int(required=True)
     timestamp = fields.Date(required=True, format="%Y-%m")

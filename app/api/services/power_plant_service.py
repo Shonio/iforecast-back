@@ -66,8 +66,12 @@ def get_monthly_stats_with_model_data(power_plant_id: int, timestamp: date, mode
 
 
 def get_power_plant_stats_with_model_data(power_plant_id: int, timestamp: date, model_ids: list) -> pd.DataFrame:
-    # SELECT * FROM solar_power_system.plant_data as pd INNER JOIN plant_data_predictions as pdp ON pdp.plant_data_id=pd.id where pd.timestamp >= '2023-08-25' and  pd.timestamp < '2023-08-26' and pdp.prediction_model_id in (1, 2)
-    sql_query = text(f"SELECT * FROM plant_data as pd INNER JOIN plant_data_predictions as pdp ON pdp.plant_data_id=pd.id where pd.power_plant_id = {power_plant_id} and pd.timestamp >= '{timestamp}' and  pd.timestamp < '{timestamp + timedelta(days=1)}' and pdp.prediction_model_id in ({', '.join(map(str, model_ids))});")
+    return get_power_plant_stats_in_range_with_model_data(power_plant_id, timestamp, timestamp + timedelta(days=1), model_ids)
+
+
+def get_power_plant_stats_in_range_with_model_data(power_plant_id: int, start_date: date, end_date: date, model_ids: list) -> pd.DataFrame:
+    # SELECT * FROM plant_data as pd INNER JOIN plant_data_predictions as pdp ON pdp.plant_data_id=pd.id where pd.timestamp >= '2023-08-25' and  pd.timestamp < '2023-08-26' and pdp.prediction_model_id in (1, 2)
+    sql_query = text(f"SELECT * FROM plant_data as pd INNER JOIN plant_data_predictions as pdp ON pdp.plant_data_id=pd.id where pd.power_plant_id = {power_plant_id} and pd.timestamp >= '{start_date}' and  pd.timestamp < '{end_date}' and pdp.prediction_model_id in ({', '.join(map(str, model_ids))});")
     result = db.session.execute(sql_query)
     df = pd.DataFrame(result.fetchall())
 
